@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔢 Missing Number Game</title>
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --accent: #ffeaa7;
+      --dark: #2d3436;
+      --light: #f5f5f5;
+      --card-light: rgba(255, 255, 255, 0.95);
+      --card-dark: rgba(45, 52, 54, 0.9);
+      --text-dark: #2d3436;
+      --text-light: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: var(--light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--dark);
+      color: var(--text-light);
+    }
+
+    header, footer {
+      background-color: var(--primary);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    header > div {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    nav a,
+    nav button {
+      color: white;
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+    }
+
+    nav button#themeToggle {
+      font-size: 0.9rem;
+      padding: 6px 10px;
+      min-width: 34px;
+      text-align: center;
+    }
+
+    nav a:hover,
+    nav button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: var(--primary);
+        padding: 10px;
+        border-radius: 8px;
+        z-index: 999;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .game-container {
+      background: var(--card-light);
+      border-radius: 20px;
+      padding: 40px 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      max-width: 500px;
+      width: 100%;
+      transition: 0.3s ease;
+    }
+
+    body.dark .game-container {
+      background: var(--card-dark);
+    }
+
+    .sequence {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 300px;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      text-align: center;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+
+    .reset-btn {
+      display: none;
+    }
+
+    #feedback {
+      margin-top: 15px;
+      font-size: 1rem;
+    }
+
+    footer {
+      justify-content: center;
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 12px 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🔢 Missing Number Game</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="game-container">
+      <div id="round">Round 1</div>
+      <div class="sequence" id="sequenceDisplay">Loading...</div>
+      <input type="number" id="userInput" placeholder="Enter the missing number" />
+      <button onclick="checkAnswer()">Submit</button>
+      <p id="feedback"></p>
+      <button class="reset-btn" id="resetBtn" onclick="location.reload()">🔁 Reset Game</button>
+    </div>
+  </main>
+
+  <footer>
+    Crafted with ❤️ by Jexan Joel
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+    const resetBtn = document.getElementById("resetBtn");
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    menuToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+    });
+
+    const sequenceDisplay = document.getElementById("sequenceDisplay");
+    const userInput = document.getElementById("userInput");
+    const feedback = document.getElementById("feedback");
+    const roundDisplay = document.getElementById("round");
+
+    let round = 1;
+    let sequence = [];
+    let missingIndex = 0;
+    let missingValue = 0;
+
+    function generateSequence() {
+      const start = Math.floor(Math.random() * 10) + 1;
+      const step = Math.floor(Math.random() * 5) + 1;
+      sequence = Array.from({ length: 6 }, (_, i) => start + i * step);
+      missingIndex = Math.floor(Math.random() * sequence.length);
+      missingValue = sequence[missingIndex];
+      const displayed = sequence.map((val, i) => i === missingIndex ? "?" : val).join(", ");
+      sequenceDisplay.textContent = displayed;
+    }
+
+    function checkAnswer() {
+      const guess = parseInt(userInput.value);
+      if (guess === missingValue) {
+        round++;
+        roundDisplay.textContent = `Round ${round}`;
+        feedback.textContent = "✅ Correct! Next sequence...";
+        userInput.value = "";
+        setTimeout(() => {
+          feedback.textContent = "";
+          generateSequence();
+        }, 1500);
+      } else {
+        feedback.textContent = `❌ Wrong! The correct number was ${missingValue}.`;
+        resetBtn.style.display = 'inline-block';
+      }
+    }
+
+    generateSequence();
+  </script>
+</body>
+</html>

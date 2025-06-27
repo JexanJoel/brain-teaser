@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎨 Color Blend Challenge</title>
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --accent: #ffeaa7;
+      --dark: #2c3e50;
+      --light: #ffffff;
+      --text-dark: #2c3e50;
+      --text-light: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--dark);
+      color: var(--text-light);
+    }
+
+    header, footer {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    nav a, nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: var(--primary);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: var(--light);
+      color: var(--text-dark);
+      border: 2px solid #ccc;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    body.dark .game-container {
+      background: #3b4c5a;
+      color: var(--text-light);
+      border-color: #666;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 16px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background-color: #f7f7f7;
+    }
+
+    body.dark .question {
+      background-color: #2e3d4d;
+      border-color: #888;
+    }
+
+    .color-options {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .color-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .color-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .status {
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .reset-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    footer {
+      justify-content: center;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🎨 Color Blend Challenge</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="game-container">
+      <div class="question" id="questionText">What makes: Purple?</div>
+      <div class="color-options" id="colorOptions"></div>
+      <div class="status" id="status"></div>
+      <button class="reset-btn" onclick="startGame()">🔁 New Round</button>
+    </div>
+  </main>
+
+  <footer>
+    Crafted with ❤️ by Jexan Joel
+  </footer>
+
+  <script>
+    const questionText = document.getElementById("questionText");
+    const colorOptionsDiv = document.getElementById("colorOptions");
+    const statusDiv = document.getElementById("status");
+
+    const themeToggle = document.getElementById("themeToggle");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    const blends = {
+      "Purple": ["Red", "Blue"],
+      "Orange": ["Red", "Yellow"],
+      "Green": ["Blue", "Yellow"]
+    };
+
+    const primaryColors = {
+      Red: "#e74c3c",
+      Blue: "#3498db",
+      Yellow: "#f1c40f"
+    };
+
+    let answer = [];
+    let selected = [];
+
+    // Dark mode toggle
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    menuToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+    });
+
+    function startGame() {
+      statusDiv.textContent = "";
+      selected = [];
+      const blendNames = Object.keys(blends);
+      const random = blendNames[Math.floor(Math.random() * blendNames.length)];
+      answer = blends[random];
+      questionText.textContent = `What makes: ${random}?`;
+
+      colorOptionsDiv.innerHTML = '';
+      Object.entries(primaryColors).forEach(([name, hex]) => {
+        const btn = document.createElement('button');
+        btn.className = 'color-btn';
+        btn.style.backgroundColor = hex;
+        btn.setAttribute('data-name', name);
+        btn.onclick = handleClick;
+        colorOptionsDiv.appendChild(btn);
+      });
+    }
+
+    function handleClick(e) {
+      if (selected.length >= 2) return;
+      const name = e.target.getAttribute('data-name');
+      selected.push(name);
+
+      if (selected.length === 2) {
+        const sortedInput = selected.slice().sort().join('+');
+        const sortedAnswer = answer.slice().sort().join('+');
+        if (sortedInput === sortedAnswer) {
+          statusDiv.textContent = "✅ Correct!";
+        } else {
+          statusDiv.textContent = "❌ Wrong! Try again.";
+        }
+      }
+    }
+
+    startGame();
+  </script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎭 Match the Shadows</title>
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --accent: #ffeaa7;
+      --dark: #2d3436;
+      --light: #f5f5f5;
+      --text-dark: #2d3436;
+      --text-light: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background: var(--dark);
+      color: var(--text-light);
+    }
+
+    header, footer {
+      background: var(--primary);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    header > div {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    nav a, nav button {
+      color: white;
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    nav button#themeToggle {
+      font-size: 0.9rem;
+      min-width: 34px;
+      text-align: center;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background: var(--primary);
+        padding: 10px;
+        border-radius: 8px;
+        z-index: 99;
+      }
+
+      nav.active {
+        display: flex;
+      }
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      transition: background 0.3s ease;
+    }
+
+    body.dark .game-container {
+      background: #444;
+    }
+
+    .shadow {
+      font-size: 60px;
+      margin-bottom: 20px;
+      filter: brightness(0);
+      transition: 0.3s;
+    }
+
+    .options {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .option {
+      font-size: 50px;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 10px;
+      transition: transform 0.2s;
+    }
+
+    .option:hover {
+      transform: scale(1.2);
+    }
+
+    #feedback {
+      margin-top: 20px;
+      font-weight: bold;
+      min-height: 24px;
+    }
+
+    .reset-btn {
+      display: none;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    footer {
+      justify-content: center;
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 12px 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🎭 Match the Shadows</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="game-container">
+      <div class="shadow" id="shadow">🎈</div>
+      <div class="options" id="options"></div>
+      <p id="feedback"></p>
+      <button class="reset-btn" id="resetBtn" onclick="startGame()">🔁 Play Again</button>
+    </div>
+  </main>
+
+  <footer>
+    Crafted with ❤️ by Jexan Joel
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+    const resetBtn = document.getElementById("resetBtn");
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    menuToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+    });
+
+    const icons = ["🎈", "🚗", "🍎", "🎁", "🐱", "⚽", "🍩", "🦋"];
+    let correct = "";
+
+    function startGame() {
+      resetBtn.style.display = "none";
+      document.getElementById("feedback").textContent = "";
+
+      const shadow = document.getElementById("shadow");
+      const options = document.getElementById("options");
+
+      correct = icons[Math.floor(Math.random() * icons.length)];
+      shadow.textContent = correct;
+
+      let choices = [correct];
+      while (choices.length < 3) {
+        const r = icons[Math.floor(Math.random() * icons.length)];
+        if (!choices.includes(r)) choices.push(r);
+      }
+
+      choices.sort(() => Math.random() - 0.5);
+      options.innerHTML = "";
+      choices.forEach(icon => {
+        const btn = document.createElement("div");
+        btn.className = "option";
+        btn.textContent = icon;
+        btn.onclick = () => {
+          if (icon === correct) {
+            document.getElementById("feedback").textContent = "✅ Correct!";
+          } else {
+            document.getElementById("feedback").textContent = `❌ Oops! It was ${correct}`;
+          }
+          resetBtn.style.display = "inline-block";
+        };
+        options.appendChild(btn);
+      });
+    }
+
+    startGame();
+  </script>
+</body>
+</html>

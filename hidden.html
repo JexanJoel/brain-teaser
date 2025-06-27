@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔍 Hidden Emoji</title>
+  <style>
+    :root {
+      --primary: #0984e3;
+      --accent: #ffeaa7;
+      --dark: #2d3436;
+      --light: #f1f2f6;
+      --text-dark: #2d3436;
+      --text-light: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark {
+      background-color: var(--dark);
+      color: var(--text-light);
+    }
+
+    header, footer {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    nav a, nav button {
+      color: white;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: var(--primary);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .game-container {
+      background-color: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+
+    body.dark .game-container {
+      background-color: #3d3d3d;
+      color: white;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .tile {
+      background-color: var(--accent);
+      border-radius: 10px;
+      font-size: 2rem;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .tile:hover {
+      background-color: #ffeaa7cc;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .reset-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+    }
+
+    footer {
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🔍 Hidden Emoji</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="game-container">
+      <p>Find the hidden emoji! 🎯</p>
+      <div class="grid" id="emojiGrid"></div>
+      <div class="message" id="message"></div>
+      <button class="reset-btn" id="resetBtn" onclick="initGame()">🔁 Reset Game</button>
+    </div>
+  </main>
+
+  <footer>
+    Crafted with ❤️ by Jexan Joel
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    menuToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+    });
+
+    const emojis = ['🍎','🍌','🍇','🍓','🍉','🍍','🥝','🥥','🍒','🍑'];
+    const hiddenEmoji = '🎯';
+
+    function initGame() {
+      const grid = document.getElementById("emojiGrid");
+      const message = document.getElementById("message");
+      const resetBtn = document.getElementById("resetBtn");
+      message.textContent = "";
+      resetBtn.style.display = "none";
+
+      grid.innerHTML = "";
+      let tiles = [];
+
+      for (let i = 0; i < 15; i++) {
+        tiles.push(emojis[Math.floor(Math.random() * emojis.length)]);
+      }
+
+      const targetIndex = Math.floor(Math.random() * 16);
+      tiles.splice(targetIndex, 0, hiddenEmoji);
+
+      tiles.forEach((emoji, index) => {
+        const div = document.createElement("div");
+        div.className = "tile";
+        div.textContent = emoji;
+        div.addEventListener("click", () => {
+          if (emoji === hiddenEmoji) {
+            message.textContent = "🎉 You found it!";
+          } else {
+            message.textContent = "❌ Try again!";
+          }
+          resetBtn.style.display = 'inline-block';
+        });
+        grid.appendChild(div);
+      });
+    }
+
+    initGame();
+  </script>
+</body>
+</html>

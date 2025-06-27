@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧮 Quick Math</title>
+  <style>
+    :root {
+      --primary: #00cec9;
+      --accent: #ffeaa7;
+      --dark: #2d3436;
+      --light: #f8f9fa;
+      --text-dark: #2d3436;
+      --text-light: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--dark);
+      color: var(--text-light);
+    }
+
+    header, footer {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    nav a, nav button {
+      color: white;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: var(--primary);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .game-container {
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      max-width: 500px;
+      width: 100%;
+      transition: 0.3s ease-in-out;
+    }
+
+    body.dark .game-container {
+      background-color: #3a3a3a;
+    }
+
+    .question {
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .option {
+      padding: 15px 25px;
+      border-radius: 10px;
+      border: 2px solid var(--primary);
+      background-color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .option:hover {
+      background-color: #fdcb6e;
+    }
+
+    .status {
+      margin-top: 20px;
+    }
+
+    .reset-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+    }
+
+    footer {
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🧮 Quick Math</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="game-container">
+      <div class="question" id="question">5 + 3 = ?</div>
+      <div class="options" id="options"></div>
+      <div class="status">
+        <p>⏱️ Time Left: <span id="timer">60</span>s</p>
+        <p>🏆 Score: <span id="score">0</span></p>
+      </div>
+      <button class="reset-btn" id="resetBtn" onclick="location.reload()">🔁 Reset Game</button>
+    </div>
+  </main>
+
+  <footer>
+    Crafted with ❤️ by Jexan Joel
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+    const resetBtn = document.getElementById("resetBtn");
+
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    menuToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+    });
+
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const timerEl = document.getElementById("timer");
+    const scoreEl = document.getElementById("score");
+
+    let score = 0;
+    let timeLeft = 60;
+
+    function generateQuestion() {
+      const num1 = Math.floor(Math.random() * 10);
+      const num2 = Math.floor(Math.random() * 10);
+      const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
+      let answer;
+
+      switch (op) {
+        case '+': answer = num1 + num2; break;
+        case '-': answer = num1 - num2; break;
+        case '*': answer = num1 * num2; break;
+      }
+
+      const questionText = `${num1} ${op} ${num2} = ?`;
+      questionEl.textContent = questionText;
+      const answers = [answer];
+
+      while (answers.length < 3) {
+        const wrong = answer + Math.floor(Math.random() * 10) - 5;
+        if (!answers.includes(wrong)) answers.push(wrong);
+      }
+
+      const shuffled = answers.sort(() => Math.random() - 0.5);
+      optionsEl.innerHTML = '';
+      shuffled.forEach(option => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = option;
+        btn.onclick = () => {
+          if (option === answer) {
+            score += 10;
+            scoreEl.textContent = score;
+          }
+          generateQuestion();
+        };
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    const gameTimer = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(gameTimer);
+        questionEl.textContent = `⏰ Time's up! Your score is ${score}`;
+        optionsEl.innerHTML = '';
+        resetBtn.style.display = 'inline-block';
+      }
+    }, 1000);
+
+    generateQuestion();
+  </script>
+</body>
+</html>

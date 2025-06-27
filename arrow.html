@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔁 Arrow Memory</title>
+  <style>
+    :root {
+      --primary: #0984e3;
+      --accent: #ffeaa7;
+      --dark: #2d3436;
+      --light: #f5f5f5;
+      --text-dark: #2d3436;
+      --text-light: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--light);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--dark);
+      color: var(--text-light);
+    }
+
+    header, footer {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    nav a, nav button {
+      color: white;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      padding: 6px 12px;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 65px;
+        right: 20px;
+        background-color: var(--primary);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .game-container {
+      background-color: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      transition: 0.3s;
+    }
+
+    body.dark .game-container {
+      background-color: #3d3d3d;
+      color: white;
+    }
+
+    .arrow-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 80px);
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .arrow-btn {
+      font-size: 2rem;
+      padding: 15px;
+      border-radius: 12px;
+      background-color: var(--accent);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .arrow-btn.glow {
+      background-color: #ffe16b !important;
+      box-shadow: 0 0 25px 10px #ffe16b;
+      transform: scale(1.2);
+      z-index: 2;
+    }
+
+    .status {
+      font-size: 1.1rem;
+      margin-top: 15px;
+      min-height: 24px;
+    }
+
+    .reset-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+    }
+
+    footer {
+      justify-content: center;
+      font-size: 0.9rem;
+      padding: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>🔁 Arrow Memory</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="navMenu">
+      <a href="index.html">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="game-container">
+      <div class="arrow-grid">
+        <button class="arrow-btn" data-dir="⬅️">⬅️</button>
+        <button class="arrow-btn" data-dir="➡️">➡️</button>
+        <button class="arrow-btn" data-dir="⬆️">⬆️</button>
+        <button class="arrow-btn" data-dir="⬇️">⬇️</button>
+      </div>
+      <div class="status" id="status">Watch the pattern!</div>
+      <button class="reset-btn" id="resetBtn" onclick="location.reload()">🔁 Reset Game</button>
+    </div>
+  </main>
+
+  <footer>
+    Crafted with ❤️ by Jexan Joel
+  </footer>
+
+  <script>
+    const directions = ["⬅️", "➡️", "⬆️", "⬇️"];
+    const arrowBtns = document.querySelectorAll(".arrow-btn");
+    const statusText = document.getElementById("status");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const themeToggle = document.getElementById("themeToggle");
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    // Theme toggle
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    // Hamburger toggle
+    menuToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+    });
+
+    let pattern = [];
+    let userIndex = 0;
+
+    function startPattern() {
+      const random = directions[Math.floor(Math.random() * directions.length)];
+      pattern.push(random);
+      statusText.textContent = `Round ${pattern.length}`;
+      showPattern();
+    }
+
+    function showPattern() {
+      let i = 0;
+      arrowBtns.forEach(btn => btn.disabled = true);
+
+      const interval = setInterval(() => {
+        const dir = pattern[i];
+        const btn = [...arrowBtns].find(b => b.dataset.dir === dir);
+        btn.classList.add("glow");
+
+        setTimeout(() => btn.classList.remove("glow"), 500);
+        i++;
+
+        if (i >= pattern.length) {
+          clearInterval(interval);
+          arrowBtns.forEach(btn => btn.disabled = false);
+          userIndex = 0;
+        }
+      }, 800);
+    }
+
+    arrowBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const clicked = btn.dataset.dir;
+        if (clicked === pattern[userIndex]) {
+          userIndex++;
+          if (userIndex === pattern.length) {
+            setTimeout(() => startPattern(), 1000);
+          }
+        } else {
+          statusText.textContent = `❌ Wrong! You reached Round ${pattern.length}`;
+          arrowBtns.forEach(b => b.disabled = true);
+          resetBtn.style.display = "inline-block";
+        }
+      });
+    });
+
+    // Start the game
+    startPattern();
+  </script>
+</body>
+</html>
